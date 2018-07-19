@@ -4,9 +4,11 @@ import { StackNavigator } from 'react-navigation';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import RealmTasks from './RealmTasks'
+import TaskStore from './TaskStore'
 import DetailsScreen from './DetailsScreen'
 import AddTaskScreen from './AddTaskScreen'
-import TaskStore from './TaskStore'
+import HomeScreen from './HomeScreen'
+
 
 let realmTasks = new RealmTasks();
 

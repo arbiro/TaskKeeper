@@ -71,9 +71,24 @@ export default class TaskStore
     let task = this.tasks[taskKey];
     if (task && task.events.length>0)
     {
-      return task.events.slice(-1)[0].type == startEventType;
+      let lastEvent = task.events.slice(-1)[0];
+      let retValue = lastEvent.type == startEventType;
+      return retValue;
     }
-    return false
+    else
+      return false
+  }
+
+  getRunningTaskIndex()
+  {
+    for(let i=0;i<this.tasks.length;i++)
+    {
+      if (this.isTaskRunning(this.tasks[i]))
+      {
+        return i;
+      }
+    }
+    return -1;
   }
 
   getRunningTime(taskKey)

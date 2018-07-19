@@ -2,18 +2,19 @@ import React, { Component } from 'react';
 import { AppRegistry, Text, TextInput, Button , View, Picker} from 'react-native';
 
 
-class HomeScreen extends React.Component {
+export default class HomeScreen extends React.Component {
   constructor(props)
   {
     super(props)
     this.taskStore = this.props.screenProps.taskStore;
-    this.state = {time: "", runningState: false, selectedService: "", selectedServicePos: 0};
+    this.state = {time: "", runningState: false, selectedService: 0};
     this.taskStore.addListener(this.forceUpdate.bind(this))
   }
 
   componentDidMount()
   {
-    this.interval = setInterval(() => this.setState({ time: this.taskStore.getRunningTime(this.state.selectedServicePos) }), 300);
+    this.interval = setInterval(() => this.setState({ time: this.taskStore.getRunningTime(this.state.selectedService) }), 300);
+    this.setState({selectedServicePos: this.taskStore.getRunningTaskIndex()})
   }
 
   componentWillMount()
@@ -27,8 +28,8 @@ class HomeScreen extends React.Component {
 
   changeRunningState()
   {
-    this.taskStore.addEventToTask(this.state.selectedServicePos);
-    this.setState({runningState: this.taskStore.isTaskRunning(this.state.selectedServicePos)})
+    this.taskStore.addEventToTask(this.state.selectedService);
+    this.setState({runningState: this.taskStore.isTaskRunning(this.state.selectedService)})
 
     //this.setState(previousState => {
 ///  return { runningState: !this.state.selectedService.state };
@@ -37,10 +38,20 @@ class HomeScreen extends React.Component {
 
   onPickNewTask(service, pos)
   {
-    this.setState({selectedService: service,selectedServicePos: pos ,runningState: this.taskStore.isTaskRunning(pos), time: this.taskStore.getRunningTime(this.state.selectedServicePos) })
+    //let runnningTaskPos = this.taskStore.getRunningTaskIndex();
+    this.setState({selectedService: pos,runningState: this.taskStore.isTaskRunning(pos), time: this.taskStore.getRunningTime(this.state.selectedService) })
+    console.log("Running state "+ this.state.runningState);
+  }
+
+  giveRandomTask()
+  {
+    let newSelected = Math.floor(Math.random() * this.taskStore.tasks.length);
+    console.log("New selected "  + newSelected)
+    this.setState({selectedService: newSelected});
   }
 
   render() {
+    //console.log("Running state "+ this.state.runningState);
     let tasks = this.taskStore.tasks
 
     let serviceItems = tasks ? tasks.map( (obj, index) => {
@@ -56,7 +67,8 @@ class HomeScreen extends React.Component {
                 <Text style={{width: 200, backgroundColor: 'powderblue',  textAlign: 'center' }}>Pick a service</Text>
                 <Picker style={{width: 200,  backgroundColor: 'powderblue'}}
                     selectedValue={this.state.selectedService}
-                    onValueChange={this.onPickNewTask.bind(this)  } >
+                    onValueChange={this.onPickNewTask.bind(this)  }
+                    >
 
                     {serviceItems}
                 </Picker>
@@ -65,7 +77,10 @@ class HomeScreen extends React.Component {
                   title= {this.state.runningState ? "Stop" : "Start"}
                   onPress= {this.changeRunningState.bind(this)}
                 />
-
+                <Button
+                title="Give me something to do"
+                onPress={this.giveRandomTask.bind(this)}
+                />
                 <Button
                   title="Go to Details"
                   onPress={() => this.props.navigation.navigate('Details')}
