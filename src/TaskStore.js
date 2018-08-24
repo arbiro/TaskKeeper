@@ -18,7 +18,7 @@ export default class TaskStore
 {
  tasks = [];
  test = "sdasa";
- listeners = [];
+ listeners = []
 
   constructor(realmTasks)
   {
@@ -30,7 +30,14 @@ export default class TaskStore
 
   addListener(listener)
   {
-    this.listeners.push(listener)
+    return this.listeners.push(listener)-1;
+  }
+
+  removeListener(id)
+  {
+    if (id > -1) {
+      this.listeners.splice(id, 1);
+    }
   }
 
   notify()
@@ -49,7 +56,12 @@ export default class TaskStore
     this.realmTasks.addTask(task)
   }
 
-  addEventToTask(taskKey)
+  doUpdate(func)
+  {
+    this.realmTasks.doUpdate(func);
+  }
+
+  addEventToTask(taskKey, rate)
   {
     let task = this.tasks[taskKey]
     let state = startEventType;
@@ -60,11 +72,12 @@ export default class TaskStore
         if (task.events.slice(-1)[0].type == startEventType)
           state = stopEventType;
       }
-      event = {type: state, time: Date.now()}
+      event = {type: state, time: Date.now(), rating: rate}
 
       this.realmTasks.addEventToTask(task, event)
     }
   }
+
 
   isTaskRunning(taskKey)
   {
@@ -83,7 +96,7 @@ export default class TaskStore
   {
     for(let i=0;i<this.tasks.length;i++)
     {
-      if (this.isTaskRunning(this.tasks[i]))
+      if (this.isTaskRunning(i))
       {
         return i;
       }

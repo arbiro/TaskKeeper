@@ -1,9 +1,11 @@
 import Realm from 'realm'
 
+
+
 const EventSchema =
 {
   name: 'Event',
-  properties: { type: 'string', time: 'int' }
+  properties: { type: 'string', time: 'int' , rating: 'int'}
 }
 
 const TaskSchema = {
@@ -21,13 +23,18 @@ export default class RealmTasks
 {
   constructor()
   {
-    this.realm = new Realm({schema: [EventSchema, TaskSchema]});
+    this.realm = new Realm({schema: [EventSchema, TaskSchema], schemaVersion: 1});
     this.realm.write(() => {});
   }
 
   linkToRealmNotify(notifyCallBack)
   {
     this.realm.addListener('change', notifyCallBack);
+  }
+
+  doUpdate(func)
+  {
+    this.realm.write( () => { func()})
   }
 
   fetchTasks()

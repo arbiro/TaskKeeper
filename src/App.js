@@ -6,7 +6,7 @@ import { observer } from 'mobx-react';
 import RealmTasks from './RealmTasks'
 import TaskStore from './TaskStore'
 import DetailsScreen from './DetailsScreen'
-import AddTaskScreen from './AddTaskScreen'
+import TaskDetailsScreen from './TaskDetailsScreen'
 import HomeScreen from './HomeScreen'
 
 
@@ -32,7 +32,7 @@ const Navigator = StackNavigator(
   {
    Home: HomeScreen,
    Details: DetailsScreen,
-   AddTask: AddTaskScreen
+   TaskDetailsScreen: TaskDetailsScreen
  },
  {
    initialRouteName: 'Home',
