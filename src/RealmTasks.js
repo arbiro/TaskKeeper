@@ -17,13 +17,23 @@ const TaskSchema = {
   }
 }
 
+const ListSchema = {
+  name: 'List',
+  properties: {
+    name: 'string',
+    tasks: 'Task[]'
+  }
+}
+
+
+
 
 
 export default class RealmTasks
 {
   constructor()
   {
-    this.realm = new Realm({schema: [EventSchema, TaskSchema], schemaVersion: 1});
+    this.realm = new Realm({schema: [EventSchema, TaskSchema], schemaVersion: 2});
     this.realm.write(() => {});
   }
 

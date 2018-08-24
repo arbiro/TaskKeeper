@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Text, TextInput, Button , View, Picker} from 'react-native';
+import { AppRegistry, Text, TextInput, Button , View, Picker, FlatList} from 'react-native';
 
 
 export default class TaskDetailsScreen extends React.Component {
@@ -13,7 +13,7 @@ export default class TaskDetailsScreen extends React.Component {
     const taskKey = navigation.getParam('taskKey', null);
     if (taskKey)
     {
-      this.state = { text: this.taskStore.tasks[taskKey].name}
+      this.state = { text: this.taskStore.tasks[taskKey].name, events: this.taskStore.tasks[taskKey].events}
     }
   }
 
@@ -33,10 +33,16 @@ export default class TaskDetailsScreen extends React.Component {
     this.props.navigation.navigate('Details')
   }
 
+
+
   render() {
     const { navigation } = this.props;
     const taskKey = navigation.getParam('taskKey', -1);
     const addTask = navigation.getParam('addTask', false);
+    let events = this.state.events;
+    let serviceItems = events ? events.map( (obj, index) => {
+            return {key: String(index) , name: obj.type, index: index, time: obj.time}
+        }) : {};
     //const otherParam = navigation.getParam('otherParam', 'some default value');
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -45,6 +51,12 @@ export default class TaskDetailsScreen extends React.Component {
        style={{height: 100, width: 150, borderColor: 'gray', borderWidth: 1}}
        onChangeText={(text) => this.setState({text})}
        value={this.state.text}/>
+       <FlatList
+        data={serviceItems}
+         renderItem={({item}) => ( <Text>
+         {item.name}
+         </Text>)}/>
+
        <Button
          title={addTask ? "Add task" : "Save Task"}
          onPress={this.onPressSaveAddTask.bind(this)}
