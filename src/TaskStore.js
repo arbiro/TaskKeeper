@@ -11,6 +11,7 @@ getTimeDiffAsString = function(start, end)
   const timeEnd = moment(end);
   const diff = timeEnd.diff(startDate);
   const diffDuration = moment.duration(diff);
+
   return diffDuration.hours() + ":" + diffDuration.minutes() + ":" + diffDuration.seconds();
 }
 
@@ -56,14 +57,17 @@ export default class TaskStore
     this.realmTasks.addTask(task)
   }
 
+  deleteTask(task)
+  {
+    this.realmTasks.deleteTask(task);
+  }
   doUpdate(func)
   {
     this.realmTasks.doUpdate(func);
   }
 
-  addEventToTask(taskKey, rate)
+  addEventToTask(task, rate)
   {
-    let task = this.tasks[taskKey]
     let state = startEventType;
     if (task)
     {
@@ -79,9 +83,8 @@ export default class TaskStore
   }
 
 
-  isTaskRunning(taskKey)
+  isTaskRunning(task)
   {
-    let task = this.tasks[taskKey];
     if (task && task.events.length>0)
     {
       let lastEvent = task.events.slice(-1)[0];
@@ -96,7 +99,7 @@ export default class TaskStore
   {
     for(let i=0;i<this.tasks.length;i++)
     {
-      if (this.isTaskRunning(i))
+      if (this.isTaskRunning(this.tasks[i]))
       {
         return i;
       }
@@ -104,9 +107,28 @@ export default class TaskStore
     return -1;
   }
 
-  getRunningTime(taskKey)
+  getTaskLastRunningTime(task)
   {
-    let task = this.tasks[taskKey];
+    if (task && task.events.length>1)
+    {
+      let lastEvents = task.events.slice(-2);
+      if (lastEvents[1].type == startEventType)
+      {
+        return moment.duration(moment().diff(moment(lastEvents[1].time))).asSeconds();
+      }
+      return moment.duration(moment(lastEvents[1].time).diff(moment(lastEvents[0].time))).asSeconds();
+    }
+    else if(task && task.events.length>0)
+    {
+      let lastEvent = task.events.slice(-1);
+      return moment.duration(moment().diff(moment(lastEvent[0].time))).asSeconds();
+    }
+
+    return 0;
+  }
+
+  getTaskLastRunningTimeAsString(task)
+  {
     if (task && task.events.length>1)
     {
       let lastEvents = task.events.slice(-2);
@@ -124,4 +146,68 @@ export default class TaskStore
 
     return ""
   }
+
+  getTask(taskKey)
+  {
+    return this.tasks[taskKey];
+  }
+
+  getTaskIndex(task)
+  {
+    return this.tasks.indexOf(task);
+  }
+
+  getTaskRunningTimeInBetween(task, fromMoment = moment().startOf('day'), toMoment = moment())
+  {
+    var totalDuration = moment.duration(0);
+    if (task)
+    {
+      let eventsFiltered = task.events.filter((event) =>
+      {  return moment(event.time).isSameOrAfter(fromMoment, "second") && moment(event.time).isSameOrBefore(toMoment, "second"); })
+      if (eventsFiltered.length > 0)
+      {
+        var event;
+        var first = true;
+        var prevMoment = fromMoment;
+        var lastEventType = startEventType;
+        for (event of eventsFiltered)
+        {
+          currentMoment = moment(event.time);
+          lastEventType = event.type;
+          if (event.type == stopEventType)
+          {
+              totalDuration = totalDuration.add(moment.duration(currentMoment.diff(prevMoment)));
+          }
+          if (event.type == startEventType)
+          {
+              prevMoment = moment(event.time);
+          }
+        }
+
+        if (lastEventType == startEventType)
+        {
+          totalDuration = totalDuration.add(moment.duration(toMoment.diff(prevMoment)));
+        }
+      }
+    }
+    return totalDuration.asSeconds();
+  }
+
+  getDayliesCompletion(fromMoment = moment().startOf('day'), toMoment = moment())
+  {
+    sum = 0;
+    count = 0;
+    let dailyItems = this.tasks ? this.tasks.filter( (obj) => {
+            return obj.daily;
+        }) : {};
+    for (task of dailyItems)
+    {
+      sum = sum + Math.min(Math.floor(((this.getTaskRunningTimeInBetween(task, fromMoment, toMoment)/60)/task.minDailyTime )*100),100);
+      count++;
+    }
+
+    return sum/count;
+  }
+
+
 }

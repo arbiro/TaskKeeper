@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { AppRegistry, Text, TextInput, Button , View, Picker} from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { StackNavigator, createBottomTabNavigator} from 'react-navigation';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import RealmTasks from './RealmTasks'
 import TaskStore from './TaskStore'
-import DetailsScreen from './DetailsScreen'
-import TaskDetailsScreen from './TaskDetailsScreen'
+import DetailsNavigator from './DetailsScreen'
 import HomeScreen from './HomeScreen'
+import DailyScreen from './Daily'
 
 
 let realmTasks = new RealmTasks();
@@ -28,11 +28,11 @@ export default class TaskKeeper extends React.Component {
 }
 
 
-const Navigator = StackNavigator(
+const Navigator = createBottomTabNavigator(
   {
    Home: HomeScreen,
-   Details: DetailsScreen,
-   TaskDetailsScreen: TaskDetailsScreen
+   Daily: DailyScreen,
+   Details: DetailsNavigator,
  },
  {
    initialRouteName: 'Home',

@@ -13,7 +13,9 @@ const TaskSchema = {
   properties: {
     name:  'string',
     events: 'Event[]',
-    parentTask: 'Task?'
+    parentTask: 'Task?',
+    daily: 'bool',
+    minDailyTime: 'int'
   }
 }
 
@@ -33,7 +35,7 @@ export default class RealmTasks
 {
   constructor()
   {
-    this.realm = new Realm({schema: [EventSchema, TaskSchema], schemaVersion: 2});
+    this.realm = new Realm({schema: [EventSchema, TaskSchema], schemaVersion: 3});
     this.realm.write(() => {});
   }
 
@@ -55,6 +57,11 @@ export default class RealmTasks
   addTask(task)
   {
     this.realm.write(() => {this.realm.create('Task', task)});
+  }
+
+  deleteTask(task)
+  {
+    this.realm.write(() => {this.realm.delete(task)});
   }
 
   addEventToTask(task, event)

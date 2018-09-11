@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-
+import { createStackNavigator} from 'react-navigation';
 import { AppRegistry, Text, TextInput, Button , View, Picker, FlatList, StyleSheet} from 'react-native';
+
+import TaskDetailsScreen from './TaskDetailsScreen'
+
 
 const styles = StyleSheet.create({
   container: {
@@ -21,14 +24,16 @@ const styles = StyleSheet.create({
 })
 
 
-export default class DetailsScreen extends React.Component {
+
+
+class DetailsScreen extends React.Component {
   constructor(props)
   {
     super(props)
     this.taskStore = this.props.screenProps.taskStore;
-    //this.state = {time: "", runningState: false, selectedService: "", selectedServicePos: 0};
+    //this.state = {time: "", running: false, selectedService: "", selectedServicePos: 0};
 
-    this.listenerId = this.taskStore.addListener(this.forceUpdate.bind(this))
+    //this.listenerId = this.taskStore.addListener(this.forceUpdate.bind(this));
   }
 
   forceUpdate()
@@ -38,6 +43,11 @@ export default class DetailsScreen extends React.Component {
   componentWillFocus()
   {
 
+  }
+
+  componentDidMount()
+  {
+    this.listenerId = this.taskStore.addListener(this.forceUpdate.bind(this));
   }
 
   componentWillUnmount()
@@ -50,7 +60,7 @@ export default class DetailsScreen extends React.Component {
     let x = this.state;
     //TO DO - DON"T USE INDEX MAYBE
     let serviceItems = tasks ? tasks.map( (obj, index) => {
-            return {key: obj.name, index: index, running:this.taskStore.isTaskRunning(index)}
+            return {key: obj.name, index: index, obj: obj, running:this.taskStore.isTaskRunning(obj)}
         }) : {};
     return (
      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -58,16 +68,9 @@ export default class DetailsScreen extends React.Component {
        data={serviceItems}
         renderItem={({item}) => ( <Text
         style={item.running ? styles.runningItem : styles.item }
-        onPress={() => this.props.navigation.navigate('TaskDetailsScreen', {addTask: false, taskKey:item.index})}>
+        onPress={() => this.props.navigation.navigate('TaskDetailsScreen', {addTask: false, task:item.obj})}>
         {item.key}
         </Text>)}/>
-
-
-        <Text>Details Screen</Text>
-        <Button
-          title="Go to Home"
-          onPress={() => this.props.navigation.navigate('Home')}
-        />
 
         <Button
           title="Add task"
@@ -77,3 +80,13 @@ export default class DetailsScreen extends React.Component {
     );
   }
 }
+
+export default DetailsNavigator = createStackNavigator(
+  {
+   Details: DetailsScreen,
+   TaskDetailsScreen: TaskDetailsScreen
+ },
+ {
+   initialRouteName: 'Details',
+ }
+);
